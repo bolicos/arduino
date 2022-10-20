@@ -5,7 +5,7 @@ from machine import ADC, Pin, PWM, Signal
 TRAINING_MODE = False
 BUILD_LED_PIN = 25
 LED_PIN = 7
-POTENTIOMETER_PI = 
+POTENTIOMETER_PI = 5
 TRAINING_MODE_BUTTON = 9
 CONFIRM_BUTTON = 10
 
@@ -17,8 +17,10 @@ class Led:
 
     def enable(self):
         self.signal.on()
+
     def disable(self):
         self.signal.off()
+
     def invert(self):
         print(self.signal.value())
 
@@ -42,8 +44,11 @@ class Servo:
         self.pin = Pin(value, Pin.OUT)
         self.pwd = PWM(self.pin, freq=50)
 
-    def setPosition(self):
-        self.pwd.value()
+    def getPosition(self):
+        self.pwd.dutty()
+
+    def setPosition(self, value):
+        self.pwd.dutty(value)
 
 # FUNCTIONS ==========================================
 def main():
@@ -70,10 +75,17 @@ def loop():
     if (TRAINING_MODE):
         print('TRAINING_MODE')
 
+def exemplo():
+    servo = Servo(POTENTIOMETER_PI)
+    servo.setPosition(40)
+    servo.setPosition(77)
+    servo.setPosition(115)
+
 
 # MAIN ==========================================
 while True:
-    loop()
+    # loop()
+    exemplo()
 
 
 

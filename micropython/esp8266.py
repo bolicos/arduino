@@ -25,7 +25,6 @@ def enableLED():
     LED_BOARD.off()
     time.sleep(0.5)
 
-
 def enableServo():
     print("enableServo")
     servo = PWM(D5, freq=50)
@@ -41,7 +40,6 @@ def enableServo():
         print(servo)
 
     time.sleep(2)
-
 
 def enablePotentiometer():
     print("enablePotentiometer")
@@ -86,7 +84,7 @@ def enableButton():
 
 # --------------- WELCOME -------------------
 while True:
-    # enableLED()
+    enableLED()
     # enableServo()
     # enablePotentiometer()
-    enableButton()
+    # enableButton()
