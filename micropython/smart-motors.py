@@ -33,11 +33,10 @@ class Button:
 
 class Potentiometer:
     def __init__(self, value):
-        # self.pin = Pin(value, Pin.OUT)
-        self.pwd = ADC(28)
+        self.adc = ADC(value)
 
-    def setPosition(self):
-        self.pwd.value()
+    def getValue(self):
+        return self.adc.read()
 
 class Servo:
     def __init__(self, value):
@@ -45,10 +44,17 @@ class Servo:
         self.pwd = PWM(self.pin, freq=50)
 
     def getPosition(self):
-        self.pwd.dutty()
+        self.pwd.duty()
 
     def setPosition(self, value):
-        self.pwd.dutty(value)
+        self.pwd.duty(value)
+
+class Ldr:
+    def __init__(self, value):
+        self.adc = ADC(value)
+
+    def getValue(self):
+        return self.adc.read()
 
 # FUNCTIONS ==========================================
 def main():
@@ -75,17 +81,38 @@ def loop():
     if (TRAINING_MODE):
         print('TRAINING_MODE')
 
-def exemplo():
+def servo():
     servo = Servo(POTENTIOMETER_PI)
     servo.setPosition(40)
     servo.setPosition(77)
     servo.setPosition(115)
 
+def led():
+    led = Led(2)
+    led.enable()
+    led.disable()
+
+def ldr():
+    ldr = Ldr(0)
+    value = ldr.getValue()
+    print(value)
+    time.sleep(0.2)
+
+def potentiometer():
+    ldr = Potentiometer(0)
+    value = ldr.getValue()
+    print(value)
+    time.sleep(0.2)
+
 
 # MAIN ==========================================
 while True:
+    main()
     # loop()
-    exemplo()
+    # servo()
+    # led()
+    # ldr()
+    # potentiometer()
 
 
 
@@ -97,3 +124,16 @@ while True:
 # Métodos/funções/variáveis     =   minúsculos_separados_por_underlines     =   variavel_aleatoria
 # Globais/constantes            =   maiúsculos_separados_por_underlines     =   CONSTANTE
 # Classes                       =   Iniciais Maiúsculas                     =   NormalDistribution
+
+
+# D0 = GPIO_16
+# D1 = GPIO_5
+# D2 = GPIO_4
+# D3 = GPIO_0
+# D4 = GPIO_2
+# D5 = GPIO_14
+# D6 = GPIO_12
+# D7 = GPIO_13
+# D8 = GPIO_15
+# RX = GPIO_3
+# TX = GPIO_1
