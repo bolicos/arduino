@@ -1,28 +1,34 @@
+# Raspberry Pi Pico Board Pins
+#
+# Sensors pins: A0 - 31.
+# Sensors (Potentiometer) pins: A1 - 32.
+# Actuators (Commons) pins: 5, 6, 7 - GPIO3, GPIO4 e GPIO5.
+# Button pin: 2 - GPIO1.
+
 import time
 from machine import ADC, Pin, PWM, Signal
 
 # Constants ==========================================
+BAUD_RATE = 9600
+ELEMENT_COUNT_MAX = 50
+
+PIN_BUTTON = 2
+PIN_SENSORS_INIT = 31
+PIN_SENSORS_POTENTIOMETER_INIT = 32
+PIN_ACTUATORS_INIT = 5
+
 TRAINING_MODE = False
-BUILD_LED_PIN = 25
-LED_PIN = 7
-POTENTIOMETER_PI = 5
-TRAINING_MODE_BUTTON = 9
-CONFIRM_BUTTON = 10
+
+QTD_SENSORS = 1
+QTD_ACTUATORS = 1
 
 # Classes ==========================================
-class Led:    
+class Sensor:    
     def __init__(self, value):
-        self.pin = Pin(value, Pin.OUT)
-        self.signal = Signal(self.pin, invert=False)
+        self.pin = ADC(value)
 
-    def enable(self):
-        self.signal.on()
-
-    def disable(self):
-        self.signal.off()
-
-    def invert(self):
-        print(self.signal.value())
+    def getValue(self):
+        self.pin.value()
 
 class Button:
     def __init__(self, value):
@@ -33,11 +39,10 @@ class Button:
 
 class Potentiometer:
     def __init__(self, value):
-        # self.pin = Pin(value, Pin.OUT)
-        self.pwd = ADC(28)
+        self.pin = ADC(value)
 
     def setPosition(self):
-        self.pwd.value()
+        self.pin.value()
 
 class Servo:
     def __init__(self, value):
@@ -50,18 +55,39 @@ class Servo:
     def setPosition(self, value):
         self.pwd.dutty(value)
 
+# VARIABLES ==========================================
+button = Button(PIN_BUTTON)
+sensores = []
+actuators = []
+potentiometers = []
+
 # FUNCTIONS ==========================================
+def sensors_init():
+    print('sensors_init')
+    for index in range(QTD_SENSORS):
+        sen = Sensor(PIN_SENSORS_INIT + index -1)
+        sensores.append(sen)
+
+def actuators_init():
+    print('actuators_init')
+    for index in range(QTD_ACTUATORS):
+        act = Servo(PIN_ACTUATORS_INIT + index -1)
+        pot = Potentiometer(PIN_SENSORS_POTENTIOMETER_INIT + index -1)
+        actuators.append(act)
+        potentiometers.append(pot)
+
 def main():
     print('===========================================')
     print('Welcome!')
+    sensors_init()
+    actuators_init()
 
 def loop():
     global TRAINING_MODE
 
     main()
 
-    led = Led(LED_PIN)
-    training_mode_button = Button(TRAINING_MODE_BUTTON)
+    button_is_pressed = button.is_pressed()
 
     is_change_mode = training_mode_button.is_pressed()
 
@@ -75,17 +101,10 @@ def loop():
     if (TRAINING_MODE):
         print('TRAINING_MODE')
 
-def exemplo():
-    servo = Servo(POTENTIOMETER_PI)
-    servo.setPosition(40)
-    servo.setPosition(77)
-    servo.setPosition(115)
-
 
 # MAIN ==========================================
 while True:
-    # loop()
-    exemplo()
+    loop()
 
 
 

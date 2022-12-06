@@ -1,19 +1,18 @@
 // Arduino UNO Board Pins
 //
 // Sensors pins: A0, A1, A2.
+// Sensors (Potentiometer) pins: A3, A4, A5.
 // Actuators (Commons) pins: 9, 10, 11.
-// Actuators (Potentiometer) pins: A3, A4, A5.
 // Button pin: 7.
 
-const int ELEMENT_COUNT_MAX = 50;
-const int PIN_ACTUATORS_INIT = 9;
-const int PIN_BUTTON = 7;
-
-const byte PIN_SENSORS_COMMOM_INIT = A0;
-const byte PIN_SENSORS_POTENTIOMETER_INIT = A3;
-const byte PIN_SENSORS_INIT = A0;
-
 const int BAUD_RATE = 9600;
+const int ELEMENT_COUNT_MAX = 50;
+
+const int PIN_BUTTON = 7;
+const int PIN_ACTUATORS_INIT = 9;
+const unsigned int PIN_SENSORS_INIT = A0;
+const unsigned int PIN_SENSORS_POTENTIOMETER_INIT = A3;
+
 const int QTD_ACTUATORS = 1;
 const int QTD_SENSORS = 1;
 
@@ -125,7 +124,7 @@ void setup()
 
   for (int index = 0; index < QTD_SENSORS; index++)
   {
-    sensors[index].begin(PIN_SENSORS_COMMOM_INIT + index);
+    sensors[index].begin(PIN_SENSORS_INIT + index);
   }
 
   for (int index = 0; index < QTD_ACTUATORS; index++)
