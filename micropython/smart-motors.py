@@ -6,7 +6,7 @@
 # Button pin: 2 - GPIO1.
 
 import time
-from machine import ADC, Pin, PWM, Signal
+from machine import ADC, Pin, PWM
 
 # Constants ==========================================
 BAUD_RATE = 9600
@@ -18,6 +18,7 @@ PIN_SENSORS_POTENTIOMETER_INIT = 32
 PIN_ACTUATORS_INIT = 5
 
 TRAINING_MODE = False
+SETUP = True
 
 QTD_SENSORS = 1
 QTD_ACTUATORS = 1
@@ -28,7 +29,7 @@ class Sensor:
         self.pin = ADC(value)
 
     def getValue(self):
-        self.pin.value()
+        return self.pin.value()
 
 class Button:
     def __init__(self, value):
@@ -41,8 +42,8 @@ class Potentiometer:
     def __init__(self, value):
         self.pin = ADC(value)
 
-    def setPosition(self):
-        self.pin.value()
+    def getValue(self):
+        return self.adc.read()
 
 class Servo:
     def __init__(self, value):
@@ -50,10 +51,10 @@ class Servo:
         self.pwd = PWM(self.pin, freq=50)
 
     def getPosition(self):
-        self.pwd.dutty()
+        return self.pwd.duty()
 
     def setPosition(self, value):
-        self.pwd.dutty(value)
+        self.pwd.duty(value)
 
 # VARIABLES ==========================================
 button = Button(PIN_BUTTON)
@@ -83,28 +84,21 @@ def main():
     actuators_init()
 
 def loop():
-    global TRAINING_MODE
-
-    main()
+    # global TRAINING_MODE
 
     button_is_pressed = button.is_pressed()
-
-    is_change_mode = training_mode_button.is_pressed()
-
-    if (is_change_mode): led.invert()
-    if (led.pin.value() == 1): TRAINING_MODE = True
-    else: TRAINING_MODE = False
-
-    time.sleep(0.1)
-    print(TRAINING_MODE)
-
-    if (TRAINING_MODE):
-        print('TRAINING_MODE')
 
 
 # MAIN ==========================================
 while True:
+    if (SETUP): main()
+
     loop()
+
+    # servo()
+    # led()
+    # ldr()
+    # potentiometer()
 
 
 
@@ -116,3 +110,16 @@ while True:
 # Métodos/funções/variáveis     =   minúsculos_separados_por_underlines     =   variavel_aleatoria
 # Globais/constantes            =   maiúsculos_separados_por_underlines     =   CONSTANTE
 # Classes                       =   Iniciais Maiúsculas                     =   NormalDistribution
+
+
+# D0 = GPIO_16
+# D1 = GPIO_5
+# D2 = GPIO_4
+# D3 = GPIO_0
+# D4 = GPIO_2
+# D5 = GPIO_14
+# D6 = GPIO_12
+# D7 = GPIO_13
+# D8 = GPIO_15
+# RX = GPIO_3
+# TX = GPIO_1
