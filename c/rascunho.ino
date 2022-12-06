@@ -140,7 +140,6 @@ void setup()
 void loop()
 {
   isPressedButton = button.isPressed();
-  Serial.println(isPressedButton);
 
   for (int index = 0; index < QTD_SENSORS; index++)
   {

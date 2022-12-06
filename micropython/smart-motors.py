@@ -28,7 +28,7 @@ class Sensor:
     def __init__(self, value):
         self.pin = ADC(value)
 
-    def getValue(self):
+    def get_value(self):
         return self.pin.value()
 
 class Button:
@@ -42,7 +42,7 @@ class Potentiometer:
     def __init__(self, value):
         self.pin = ADC(value)
 
-    def getValue(self):
+    def get_value(self):
         return self.adc.read()
 
 class Servo:
@@ -50,59 +50,127 @@ class Servo:
         self.pin = Pin(value, Pin.OUT)
         self.pwd = PWM(self.pin, freq=50)
 
-    def getPosition(self):
+    def get_position(self):
         return self.pwd.duty()
 
-    def setPosition(self, value):
+    def set_position(self, value):
         self.pwd.duty(value)
 
 # VARIABLES ==========================================
 button = Button(PIN_BUTTON)
-sensores = []
-actuators = []
-potentiometers = []
+sensors = [Sensor]
+actuators = [Servo]
+potentiometers = [Potentiometer]
+
+sensors_aux = [int]
+actuators_aux = [int]
+
+sensors_saved_values = [[int]]
+actuators_saved_values = [[int]]
+
+training_counter = 0
+button_counter = 0
+
+pressed_short = False
+pressed_long = False
+pressed = False
+done = False
 
 # FUNCTIONS ==========================================
 def sensors_init():
     print('sensors_init')
     for index in range(QTD_SENSORS):
-        sen = Sensor(PIN_SENSORS_INIT + index -1)
-        sensores.append(sen)
+        sen = Sensor(PIN_SENSORS_INIT + index)
+        sensors.append(sen)
 
 def actuators_init():
     print('actuators_init')
     for index in range(QTD_ACTUATORS):
-        act = Servo(PIN_ACTUATORS_INIT + index -1)
-        pot = Potentiometer(PIN_SENSORS_POTENTIOMETER_INIT + index -1)
+        act = Servo(PIN_ACTUATORS_INIT + index)
+        pot = Potentiometer(PIN_SENSORS_POTENTIOMETER_INIT + index)
         actuators.append(act)
         potentiometers.append(pot)
 
-def main():
+def setup():
     print('===========================================')
     print('Welcome!')
     sensors_init()
     actuators_init()
 
 def loop():
-    # global TRAINING_MODE
+    pressed_short = button.is_pressed()
 
-    button_is_pressed = button.is_pressed()
+    if pressed_short:
+        button_counter += 1
+    else:
+        button_counter = 0
 
+    if (pressed_short and button_counter > 15):
+        pressed_long = True
+    else:
+        pressed_long = False
+
+    if (pressed_short and not pressed_long):
+        pressed = True
+    else:
+        pressed = False
+
+    if (pressed_long):
+        done = True
+        print('Completed training!')
+        button_counter = 0
+
+    for index in range(QTD_SENSORS):
+        sensors_aux[index] = sensors[index].get_value()
+    for index in range(QTD_ACTUATORS):
+        actuators_aux[index] = potentiometers[index].get_value()
+
+# Conditionals
+    if (done):
+        diff = 0
+        position = 0
+
+        for index in range(QTD_SENSORS):
+            value = abs(sensors_saved_values[0][index] - sensors_aux[index])
+            diff = diff + value
+
+        for index in range(training_counter):
+            new_diff = 0
+
+            for aux in range(QTD_SENSORS):
+                value = abs(sensors_saved_values[index][aux] - sensors_aux[aux])
+                new_diff = new_diff + value
+            
+            if (new_diff < diff):
+                diff = new_diff
+                position = index
+
+        for index in range(QTD_ACTUATORS):
+            value = actuators_saved_values[position][index]
+            actuators[index].set_position(value)
+    elif(pressed):
+        for index in range(QTD_SENSORS):
+            value = sensors_aux[index]
+            sensors_saved_values[training_counter][index](value)
+
+        for index in range(QTD_ACTUATORS):
+            value = actuators_aux[index]
+            actuators_saved_values[training_counter][index](value)
+
+        training_counter += 1
+    else:
+        for index in range(QTD_ACTUATORS):
+            value = actuators_aux[index]
+            actuators[index].set_position(value)
 
 # MAIN ==========================================
 while True:
-    if (SETUP): main()
+    if (SETUP):
+        SETUP = False
+        setup()
 
     loop()
-
-    # servo()
-    # led()
-    # ldr()
-    # potentiometer()
-
-
-
-
+    time.sleep(0.03)
 
 
 # ==========================================    CONVENCOES PYTHON  ==========================================
