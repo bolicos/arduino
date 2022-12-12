@@ -4,7 +4,7 @@
 # Sensors pins: A0 - 31.
 # Sensors (Potentiometer) pins: A1 - 32.
 # Actuators (Commons) pins: 5, 6, 7 - GPIO3, GPIO4 e GPIO5.
-# Button pin: 2 - GPIO1.
+# Button pin: 1 - GPIO0.
 
 from machine import ADC, Pin, PWM
 import time
@@ -13,7 +13,7 @@ import time
 BAUD_RATE = 9600
 ELEMENT_COUNT_MAX = 50
 
-PIN_BUTTON = 2
+PIN_BUTTON = 0
 PIN_SENSORS_INIT = 26
 PIN_SENSORS_POTENTIOMETER_INIT = 27
 PIN_ACTUATORS_INIT = 3
