@@ -1,21 +1,22 @@
-# Raspberry Pi Pico Board Pins
+
+# Raspberry Pi Pico v3 Board Pins
 #
 # Sensors pins: A0 - 31.
 # Sensors (Potentiometer) pins: A1 - 32.
 # Actuators (Commons) pins: 5, 6, 7 - GPIO3, GPIO4 e GPIO5.
 # Button pin: 2 - GPIO1.
 
-import time
 from machine import ADC, Pin, PWM
+import time
 
 # Constants ==========================================
 BAUD_RATE = 9600
 ELEMENT_COUNT_MAX = 50
 
 PIN_BUTTON = 2
-PIN_SENSORS_INIT = 31
-PIN_SENSORS_POTENTIOMETER_INIT = 32
-PIN_ACTUATORS_INIT = 5
+PIN_SENSORS_INIT = 26
+PIN_SENSORS_POTENTIOMETER_INIT = 27
+PIN_ACTUATORS_INIT = 3
 
 TRAINING_MODE = False
 SETUP = True
@@ -26,10 +27,11 @@ QTD_ACTUATORS = 1
 # Classes ==========================================
 class Sensor:    
     def __init__(self, value):
-        self.pin = ADC(value)
+        self.pin = Pin(value, Pin.IN)
+        self.adc = ADC(self.pin)
 
     def get_value(self):
-        return self.pin.value()
+        return self.adc.read_u16()
 
 class Button:
     def __init__(self, value):
@@ -40,22 +42,24 @@ class Button:
 
 class Potentiometer:
     def __init__(self, value):
-        self.pin = ADC(value)
+        self.pin = Pin(value, Pin.IN)
+        self.adc = ADC(self.pin)
 
     def get_value(self):
-        return self.adc.read()
+        return self.adc.read_u16()
 
 class Servo:
     def __init__(self, value):
         self.pin = Pin(value, Pin.OUT)
-        self.pwd = PWM(self.pin, freq=50)
+        self.pwd = PWM(self.pin)
+        self.pwd.freq(50)
 
     def get_position(self):
-        return self.pwd.duty()
+        return self.pwd.duty_ns()
 
     def set_position(self, value):
-        self.pwd.duty(value)
-
+        self.pwd.duty_ns(value)
+        
 # VARIABLES ==========================================
 button = Button(PIN_BUTTON)
 sensors = [Sensor]
@@ -78,18 +82,21 @@ done = False
 
 # FUNCTIONS ==========================================
 def sensors_init():
-    print('sensors_init')
+    print('sensors_init')    
     for index in range(QTD_SENSORS):
+        global sensors
         sen = Sensor(PIN_SENSORS_INIT + index)
-        sensors.append(sen)
+        sensors[index] = sen
 
-def actuators_init():
+def actuators_init():    
     print('actuators_init')
     for index in range(QTD_ACTUATORS):
+        global actuators
+        global potentiometers
         act = Servo(PIN_ACTUATORS_INIT + index)
         pot = Potentiometer(PIN_SENSORS_POTENTIOMETER_INIT + index)
-        actuators.append(act)
-        potentiometers.append(pot)
+        actuators[index] = act
+        potentiometers[index] = pot
 
 def setup():
     print('===========================================')
@@ -98,31 +105,44 @@ def setup():
     actuators_init()
 
 def loop():
+    global pressed_short
+
     pressed_short = button.is_pressed()
 
     if pressed_short:
+        global button_counter
         button_counter += 1
     else:
+        global button_counter
         button_counter = 0
 
     if (pressed_short and button_counter > 15):
+        global pressed_long
         pressed_long = True
     else:
+        global pressed_long
         pressed_long = False
 
     if (pressed_short and not pressed_long):
+        global pressed
         pressed = True
     else:
+        global pressed
         pressed = False
 
     if (pressed_long):
+        global done
+        global button_counter
+
         done = True
         print('Completed training!')
         button_counter = 0
 
     for index in range(QTD_SENSORS):
+        global sensors_aux
         sensors_aux[index] = sensors[index].get_value()
     for index in range(QTD_ACTUATORS):
+        global actuators_aux
         actuators_aux[index] = potentiometers[index].get_value()
 
 # Conditionals
@@ -173,21 +193,3 @@ while True:
     time.sleep(0.03)
 
 
-# ==========================================    CONVENCOES PYTHON  ==========================================
-# Módulos/pacotes               =   caracteres minúsculos                   =   projetopython
-# Métodos/funções/variáveis     =   minúsculos_separados_por_underlines     =   variavel_aleatoria
-# Globais/constantes            =   maiúsculos_separados_por_underlines     =   CONSTANTE
-# Classes                       =   Iniciais Maiúsculas                     =   NormalDistribution
-
-
-# D0 = GPIO_16
-# D1 = GPIO_5
-# D2 = GPIO_4
-# D3 = GPIO_0
-# D4 = GPIO_2
-# D5 = GPIO_14
-# D6 = GPIO_12
-# D7 = GPIO_13
-# D8 = GPIO_15
-# RX = GPIO_3
-# TX = GPIO_1
