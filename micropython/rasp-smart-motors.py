@@ -38,7 +38,7 @@ class Button:
         self.pin = Pin(value, Pin.IN)
 
     def is_pressed(self):
-        return self.pin.value() == 1
+        return self.pin.value()
 
 class Potentiometer:
     def __init__(self, value):
@@ -69,8 +69,11 @@ potentiometers = [Potentiometer]
 sensors_aux = [int]
 actuators_aux = [int]
 
-sensors_saved_values = [[int]]
-actuators_saved_values = [[int]]
+# sensors_saved_values = [[int]]
+# actuators_saved_values = [[int]]
+
+sensors_saved_values = dict()
+actuators_saved_values = dict()
 
 training_counter = 0
 button_counter = 0
@@ -100,14 +103,19 @@ def actuators_init():
 
 def setup():
     print('===========================================')
-    print('Welcome!')
+    print('Setup!')
     sensors_init()
     actuators_init()
+    print('Setup Done!')
+    print('===========================================')
 
 def loop():
     global pressed_short
 
     pressed_short = button.is_pressed()
+
+    print(button.pin)
+    print(pressed_short)
 
     if pressed_short:
         global button_counter
@@ -132,7 +140,7 @@ def loop():
 
     if (pressed_long):
         global done
-        global button_counter
+        # global button_counter
 
         done = True
         print('Completed training!')
@@ -168,16 +176,24 @@ def loop():
         for index in range(QTD_ACTUATORS):
             value = actuators_saved_values[position][index]
             actuators[index].set_position(value)
+
     elif(pressed):
+
+        global training_counter
+        print('PRESSED')
+        
         for index in range(QTD_SENSORS):
-            value = sensors_aux[index]
-            sensors_saved_values[training_counter][index](value)
+            value_sen_aux = sensors_aux[index]
+            sensors_saved_values[training_counter][index] = value_sen_aux
 
         for index in range(QTD_ACTUATORS):
             value = actuators_aux[index]
-            actuators_saved_values[training_counter][index](value)
+            actuators_saved_values[training_counter][index] = value
 
-        training_counter += 1
+        
+        print(training_counter)
+        training_counter = training_counter + 1
+
     else:
         for index in range(QTD_ACTUATORS):
             value = actuators_aux[index]
